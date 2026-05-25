@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cream">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCATCH</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [data-theme="cream"] {
+            --bg:#f0ebe3; --bg2:#e8e2d9; --text:#0a0a0a; --text2:#555;
+            --accent:#e8130a; --border:#0a0a0a; --card:#fff;
+            --nav-bg:#f0ebe3; --btn:#0a0a0a; --btn-text:#f0ebe3;
+        }
+        [data-theme="black"] {
+            --bg:#0a0a0a; --bg2:#141414; --text:#f0ebe3; --text2:#888;
+            --accent:#e8130a; --border:#f0ebe3; --card:#1a1a1a;
+            --nav-bg:#0a0a0a; --btn:#f0ebe3; --btn-text:#0a0a0a;
+        }
+        [data-theme="red"] {
+            --bg:#e8130a; --bg2:#c9100a; --text:#0a0a0a; --text2:#3a0a08;
+            --accent:#0a0a0a; --border:#0a0a0a; --card:#f5231b;
+            --nav-bg:#e8130a; --btn:#0a0a0a; --btn-text:#f0ebe3;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            background-color:var(--bg); color:var(--text);
+            font-family:'DM Sans',sans-serif;
+            transition:background-color 0.5s ease,color 0.5s ease;
+            cursor:none;
+        }
+        #cursor{
+            width:10px;height:10px;background:var(--accent);border-radius:50%;
+            position:fixed;top:0;left:0;pointer-events:none;z-index:9999;
+        }
+        #cursor-ring{
+            width:36px;height:36px;border:1px solid var(--text);border-radius:50%;
+            position:fixed;top:0;left:0;pointer-events:none;z-index:9998;opacity:0.5;
+        }
+        #page-loader{
+            position:fixed;inset:0;background:var(--bg);z-index:9000;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            transition:opacity 0.7s ease,transform 0.7s ease;
+        }
+        #page-loader.hide{opacity:0;transform:translateY(-100%);pointer-events:none;}
+        .loader-word{
+            font-family:'Bebas Neue',sans-serif;
+            font-size:clamp(5rem,14vw,11rem);
+            color:var(--text);line-height:1;overflow:hidden;
+        }
+        .loader-word span{
+            display:inline-block;transform:translateY(110%);
+            animation:slideUp 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        .loader-word span:nth-child(1){animation-delay:0s}
+        .loader-word span:nth-child(2){animation-delay:0.07s}
+        .loader-word span:nth-child(3){animation-delay:0.14s}
+        .loader-word span:nth-child(4){animation-delay:0.21s}
+        .loader-word span:nth-child(5){animation-delay:0.28s}
+        .loader-word span:nth-child(6){animation-delay:0.35s}
+        .loader-bar{
+            height:2px;background:var(--accent);width:0;margin-top:8px;
+            animation:growBar 0.9s 0.5s ease forwards;
+        }
+        @keyframes slideUp{to{transform:translateY(0)}}
+        @keyframes growBar{to{width:100%}}
+        nav{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            background:var(--nav-bg);border-bottom:1px solid var(--border);
+            padding:0 2rem;height:56px;
+            display:flex;align-items:center;justify-content:space-between;
+            transition:background 0.5s ease;
+        }
+        .nav-logo{
+            font-family:'Bebas Neue',sans-serif;font-size:1.7rem;
+            color:var(--text);text-decoration:none;letter-spacing:0.05em;
+            transition:color 0.3s;
+        }
+        .nav-logo:hover{color:var(--accent);}
+        .nav-right{display:flex;align-items:center;gap:1.5rem;}
+        .nav-link{
+            font-size:0.75rem;font-weight:500;letter-spacing:0.12em;
+            text-transform:uppercase;color:var(--text);text-decoration:none;
+            position:relative;transition:color 0.2s;
+        }
+        .nav-link::after{
+            content:'';position:absolute;bottom:-2px;left:0;
+            width:0;height:1px;background:var(--accent);transition:width 0.3s ease;
+        }
+        .nav-link:hover::after{width:100%;}
+        .nav-link:hover{color:var(--accent);}
+        .theme-dots{display:flex;gap:6px;align-items:center;margin-left:8px;}
+        .theme-dot{
+            width:12px;height:12px;border-radius:50%;cursor:none;
+            border:1px solid var(--border);transition:transform 0.2s ease;
+        }
+        .theme-dot:hover{transform:scale(1.3);}
+        .theme-dot[data-t="cream"]{background:#f0ebe3;}
+        .theme-dot[data-t="black"]{background:#0a0a0a;}
+        .theme-dot[data-t="red"]{background:#e8130a;}
+        .theme-dot.active{transform:scale(1.4);box-shadow:0 0 0 2px var(--accent);}
+        .page-content{
+            opacity:0;transform:translateY(24px);
+            transition:opacity 0.6s ease 0.2s,transform 0.6s ease 0.2s;
+        }
+        .page-content.visible{opacity:1;transform:translateY(0);}
+        ::-webkit-scrollbar{width:3px;}
+        ::-webkit-scrollbar-track{background:var(--bg);}
+        ::-webkit-scrollbar-thumb{background:var(--accent);}
+        .flash-msg{
+            position:fixed;top:68px;left:50%;transform:translateX(-50%);
+            z-index:500;padding:10px 28px;font-size:0.75rem;font-weight:500;
+            letter-spacing:0.12em;text-transform:uppercase;
+            border:1px solid var(--border);background:var(--accent);color:#fff;
+            animation:flashIn 0.4s ease,flashOut 0.4s ease 2.6s forwards;
+        }
+        @keyframes flashIn{from{opacity:0;top:60px}to{opacity:1;top:68px}}
+        @keyframes flashOut{from{opacity:1}to{opacity:0}}
+        input,select,textarea{cursor:none;}
+        a,button{cursor:none;}
+    </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<div id="page-loader">
+    <div class="loader-word">
+        <span>S</span><span>C</span><span>A</span><span>T</span><span>C</span><span>H</span>
+    </div>
+    <div class="loader-bar" style="width:6ch"></div>
+</div>
+
+<nav>
+    <a href="/shop" class="nav-logo">SCATCH</a>
+    <div class="nav-right">
+        <a href="/shop" class="nav-link">Shop</a>
+        <a href="/users/cart" class="nav-link">Bag</a>
+        <a href="/users/logout" class="nav-link">Exit</a>
+        <div class="theme-dots">
+            <div class="theme-dot" data-t="cream" title="Cream"></div>
+            <div class="theme-dot" data-t="black" title="Black"></div>
+            <div class="theme-dot" data-t="red"   title="Red"></div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // cursor
+    const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+    (function loop(){
+        rx+=(mx-rx)*0.18;ry+=(my-ry)*0.18;
+        cur.style.transform=`translate(${mx-5}px,${my-5}px)`;
+        ring.style.transform=`translate(${rx-18}px,${ry-18}px)`;
+        requestAnimationFrame(loop);
+    })();
+    document.querySelectorAll('a,button,.theme-dot').forEach(el=>{
+        el.addEventListener('mouseenter',()=>{cur.style.width='20px';cur.style.height='20px';cur.style.marginLeft='-5px';ring.style.opacity='0';});
+        el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';cur.style.marginLeft='0';ring.style.opacity='0.5';});
+    });
+    // loader
+    window.addEventListener('load',()=>{
+        setTimeout(()=>{
+            document.getElementById('page-loader').classList.add('hide');
+            document.querySelectorAll('.page-content').forEach(el=>el.classList.add('visible'));
+        },1300);
+    });
+    // theme
+    const saved=localStorage.getItem('scatch-theme')||'cream';
+    document.documentElement.setAttribute('data-theme',saved);
+    document.querySelectorAll('.theme-dot').forEach(d=>{
+        d.classList.toggle('active',d.dataset.t===saved);
+        d.addEventListener('click',()=>{
+            const t=d.dataset.t;
+            document.documentElement.setAttribute('data-theme',t);
+            localStorage.setItem('scatch-theme',t);
+            document.querySelectorAll('.theme-dot').forEach(x=>x.classList.toggle('active',x.dataset.t===t));
+        });
+    });
+</script>

@@ -1,0 +1,208 @@
+<%- include('./partials/header') %>
+<style>
+    .shop-wrap{
+        display:flex;min-height:100vh;
+        margin-top:56px;border-top:1px solid var(--border);
+    }
+    .sidebar{
+        width:220px;flex-shrink:0;
+        border-right:1px solid var(--border);
+        padding:2.5rem 1.5rem;
+        position:sticky;top:56px;height:calc(100vh - 56px);
+        overflow-y:auto;
+    }
+    .sidebar-section{margin-bottom:2.5rem;}
+    .sidebar-label{
+        font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;
+        color:var(--text2);margin-bottom:1rem;
+    }
+    .sidebar-link{
+        display:block;font-size:0.82rem;letter-spacing:0.06em;
+        color:var(--text);text-decoration:none;margin-bottom:0.6rem;
+        transition:color 0.2s,padding-left 0.2s;
+    }
+    .sidebar-link:hover{color:var(--accent);padding-left:6px;}
+    .sidebar select{
+        background:transparent;border:1px solid var(--border);
+        color:var(--text);padding:6px 10px;font-size:0.78rem;
+        width:100%;cursor:none;outline:none;
+    }
+    .products-area{flex:1;padding:2.5rem;}
+    .products-grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+        gap:1.5rem;
+    }
+    .empty-state{
+        display:flex;flex-direction:column;align-items:center;
+        justify-content:center;height:60vh;gap:1rem;
+        font-family:'Bebas Neue',sans-serif;font-size:4rem;
+        color:var(--border);opacity:0.15;
+    }
+
+    /* ── FLIP CARD ── */
+    .product-card{
+        position:relative;
+        perspective:1000px;
+        height:340px;
+    }
+    .card-inner{
+        width:100%;height:100%;
+        transform-style:preserve-3d;
+        transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);
+        position:relative;
+    }
+    .product-card:hover .card-inner{transform:rotateY(180deg);}
+    .card-front,.card-back{
+        position:absolute;inset:0;
+        backface-visibility:hidden;
+        -webkit-backface-visibility:hidden;
+        overflow:hidden;
+        border:1px solid var(--border);
+    }
+    .card-back{transform:rotateY(180deg);}
+    .card-img-wrap{
+        width:100%;height:220px;
+        display:flex;align-items:center;justify-content:center;
+        overflow:hidden;
+    }
+    .card-img-wrap img{
+        height:200px;object-fit:contain;
+        transition:transform 0.4s ease;
+    }
+    .card-info{
+        padding:12px 14px;
+        display:flex;justify-content:space-between;align-items:center;
+        border-top:1px solid var(--border);
+    }
+    .card-name{font-size:0.82rem;font-weight:500;letter-spacing:0.04em;}
+    .card-price{font-size:0.78rem;color:var(--text2);margin-top:2px;}
+    .card-add{
+        width:32px;height:32px;border-radius:50%;
+        background:var(--btn);color:var(--btn-text);
+        display:flex;align-items:center;justify-content:center;
+        text-decoration:none;font-size:1rem;flex-shrink:0;
+        transition:background 0.2s,transform 0.2s;
+        border:1px solid var(--border);
+    }
+    .card-add:hover{background:var(--accent);border-color:var(--accent);transform:rotate(90deg);}
+    /* back side */
+    .card-back{
+        background:var(--btn);color:var(--btn-text);
+        display:flex;flex-direction:column;
+        align-items:center;justify-content:center;
+        gap:1rem;padding:1.5rem;text-align:center;
+    }
+    .card-back-name{
+        font-family:'Bebas Neue',sans-serif;
+        font-size:2rem;line-height:1;
+    }
+    .card-back-price{font-size:0.85rem;letter-spacing:0.08em;}
+    .card-back-discount{
+        font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;
+        color:var(--accent);
+    }
+    .card-back-btn{
+        display:inline-flex;align-items:center;gap:8px;
+        padding:10px 24px;
+        background:var(--btn-text);color:var(--btn);
+        border:1px solid var(--btn-text);
+        font-size:0.72rem;font-weight:500;letter-spacing:0.12em;
+        text-transform:uppercase;text-decoration:none;
+        transition:background 0.2s,color 0.2s;
+        margin-top:0.5rem;
+    }
+    .card-back-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+    .success-toast{
+        position:fixed;top:68px;left:50%;transform:translateX(-50%);
+        background:var(--accent);color:#fff;
+        padding:10px 28px;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;
+        border:1px solid var(--border);z-index:500;
+        animation:flashIn 0.4s ease,flashOut 0.4s ease 2.6s forwards;
+    }
+</style>
+
+<% if(success && success.length>0){ %>
+    <div class="success-toast"><%= success %></div>
+<% } %>
+
+<div class="shop-wrap page-content">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-label">Sort</div>
+            <form action="/shop">
+                <select name="sortby" onchange="this.form.submit()">
+                    <option value="popular">Popular</option>
+                    <option value="newest">Newest</option>
+                    <option value="price_low">Price: Low</option>
+                    <option value="price_high">Price: High</option>
+                </select>
+            </form>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">Collection</div>
+            <a class="sidebar-link" href="/shop">All Products</a>
+            <a class="sidebar-link" href="/shop">New Arrivals</a>
+            <a class="sidebar-link" href="/shop">Discounted</a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-label">Filter</div>
+            <a class="sidebar-link" href="/shop">In Stock</a>
+            <a class="sidebar-link" href="/shop">On Sale</a>
+        </div>
+    </aside>
+
+    <!-- Products -->
+    <main class="products-area">
+        <% if(products.length === 0){ %>
+            <div class="empty-state">
+                <span>NO PRODUCTS</span>
+            </div>
+        <% } else { %>
+        <div class="products-grid">
+            <% products.forEach(function(product){ %>
+            <div class="product-card">
+                <div class="card-inner">
+                    <!-- Front -->
+                    <div class="card-front" style="background-color:<%= product.bgcolor || 'var(--bg2)' %>">
+                        <div class="card-img-wrap">
+                            <img src="data:image/jpeg;base64,<%= product.image %>"
+                                 alt="<%= product.name %>">
+                        </div>
+                        <div class="card-info" style="background-color:<%= product.panelcolor || 'var(--bg)' %>;color:<%= product.textcolor || 'var(--text)' %>">
+                            <div>
+                                <div class="card-name"><%= product.name %></div>
+                                <div class="card-price">
+                                    ₹<%= product.price - product.discount %>
+                                    <% if(product.discount>0){ %>
+                                        <span style="text-decoration:line-through;opacity:0.5;margin-left:4px;">₹<%= product.price %></span>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <a class="card-add" href="/users/addtocart/<%= product._id %>">
+                                <i class="ri-add-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Back -->
+                    <div class="card-back">
+                        <div class="card-back-name"><%= product.name %></div>
+                        <div class="card-back-price">₹<%= product.price - product.discount %></div>
+                        <% if(product.discount>0){ %>
+                            <div class="card-back-discount">Save ₹<%= product.discount %></div>
+                        <% } %>
+                        <a class="card-back-btn" href="/users/addtocart/<%= product._id %>">
+                            Add to Bag <i class="ri-shopping-bag-line"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+        <% } %>
+    </main>
+</div>
+
+<%- include('./partials/footer') %>

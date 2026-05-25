@@ -1,0 +1,128 @@
+<%- include('./partials/header') %>
+<style>
+    .split-panel{
+        min-height:100vh;display:flex;
+        border-top:1px solid var(--border);margin-top:56px;
+    }
+    .panel{
+        flex:1;display:flex;align-items:center;justify-content:center;
+        padding:4rem 5rem;position:relative;
+        border-right:1px solid var(--border);
+        overflow:hidden;
+    }
+    .panel:last-child{border-right:none;}
+    .panel-label{
+        position:absolute;top:2rem;left:2rem;
+        font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;
+        color:var(--text2);
+    }
+    .panel-num{
+        position:absolute;bottom:2rem;right:2rem;
+        font-family:'Bebas Neue',sans-serif;font-size:5rem;
+        color:var(--border);opacity:0.08;line-height:1;
+    }
+    .form-title{
+        font-family:'Bebas Neue',sans-serif;
+        font-size:clamp(2.5rem,5vw,3.8rem);
+        line-height:1;margin-bottom:0.3rem;
+        color:var(--text);
+    }
+    .form-sub{
+        font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;
+        color:var(--text2);margin-bottom:2rem;
+    }
+    .form-inner{width:100%;max-width:340px;}
+    .field{
+        width:100%;padding:12px 0;
+        background:transparent;border:none;
+        border-bottom:1px solid var(--border);
+        color:var(--text);font-family:'DM Sans',sans-serif;
+        font-size:0.9rem;outline:none;margin-bottom:1.2rem;
+        transition:border-color 0.3s;
+        cursor:none;
+    }
+    .field::placeholder{color:var(--text2);font-size:0.82rem;letter-spacing:0.06em;}
+    .field:focus{border-bottom-color:var(--accent);}
+    .submit-btn{
+        display:inline-flex;align-items:center;gap:10px;
+        padding:12px 28px;
+        background:var(--btn);color:var(--btn-text);
+        border:1px solid var(--border);
+        font-size:0.75rem;font-weight:500;letter-spacing:0.14em;
+        text-transform:uppercase;cursor:none;
+        transition:background 0.3s,color 0.3s,transform 0.2s;
+        margin-top:0.5rem;
+    }
+    .submit-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateX(4px);}
+    .divider{
+        position:absolute;top:0;bottom:0;left:50%;
+        width:1px;background:var(--border);
+        display:none;
+    }
+</style>
+
+<% if(error && error.length>0){ %>
+    <div class="flash-msg"><%= error %></div>
+<% } %>
+
+<div class="split-panel page-content">
+    <!-- Register -->
+    <div class="panel">
+        <span class="panel-label">New here</span>
+        <span class="panel-num">01</span>
+        <div class="form-inner">
+            <h2 class="form-title">Create<br>Account</h2>
+            <p class="form-sub">Join Scatch today</p>
+            <form autocomplete="off" action="/users/register" method="post" onsubmit="return validateRegister(this)">
+                <input class="field" type="text" placeholder="Full Name" name="fullname" required>
+                <input class="field" type="email" placeholder="Email Address" name="email" required>
+                <input class="field" type="password" placeholder="Password (min 6 chars)" name="password" minlength="6" required>
+                <button class="submit-btn" type="submit">
+                    Register <i class="ri-arrow-right-line"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login -->
+    <div class="panel">
+        <span class="panel-label">Welcome back</span>
+        <span class="panel-num">02</span>
+        <div class="form-inner">
+            <h2 class="form-title">Sign<br>In</h2>
+            <p class="form-sub">Access your account</p>
+            <form autocomplete="off" action="/users/login" method="post" onsubmit="return validateLogin(this)">
+                <input class="field" type="email" placeholder="Email Address" name="email" required>
+                <input class="field" type="password" placeholder="Password" name="password" required>
+                <button class="submit-btn" type="submit">
+                    Login <i class="ri-arrow-right-line"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function validateRegister(f){
+    const name=f.fullname.value.trim();
+    const email=f.email.value.trim();
+    const pass=f.password.value.trim();
+    if(!name||!email||!pass){showErr('All fields are required');return false;}
+    if(pass.length<6){showErr('Password must be at least 6 characters');return false;}
+    return true;
+}
+function validateLogin(f){
+    const email=f.email.value.trim();
+    const pass=f.password.value.trim();
+    if(!email||!pass){showErr('Please enter email and password');return false;}
+    return true;
+}
+function showErr(msg){
+    let el=document.querySelector('.flash-msg');
+    if(!el){el=document.createElement('div');el.className='flash-msg';document.body.appendChild(el);}
+    el.textContent=msg;el.style.display='block';
+    setTimeout(()=>el.remove(),3000);
+}
+</script>
+
+<%- include('./partials/footer') %>

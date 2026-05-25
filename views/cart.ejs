@@ -1,0 +1,179 @@
+<%- include('./partials/header') %>
+<style>
+    .cart-wrap{
+        margin-top:56px;border-top:1px solid var(--border);
+        min-height:calc(100vh - 56px);
+        display:flex;
+    }
+    .cart-items-col{
+        flex:1;border-right:1px solid var(--border);
+        padding:2.5rem;
+    }
+    .cart-summary-col{
+        width:360px;flex-shrink:0;
+        padding:2.5rem;
+        position:sticky;top:56px;
+        height:calc(100vh - 56px);
+        overflow-y:auto;
+        display:flex;flex-direction:column;
+    }
+    .col-title{
+        font-family:'Bebas Neue',sans-serif;
+        font-size:2.2rem;margin-bottom:2rem;
+        border-bottom:1px solid var(--border);padding-bottom:1rem;
+    }
+    .cart-item{
+        display:flex;gap:1.2rem;align-items:center;
+        padding:1.2rem 0;border-bottom:1px solid var(--border);
+        transition:opacity 0.3s;
+    }
+    .cart-item:hover{opacity:0.85;}
+    .item-img{
+        width:80px;height:80px;flex-shrink:0;
+        display:flex;align-items:center;justify-content:center;
+        overflow:hidden;
+    }
+    .item-img img{width:72px;height:72px;object-fit:contain;}
+    .item-info{flex:1;}
+    .item-name{font-size:0.9rem;font-weight:500;margin-bottom:4px;}
+    .item-price{font-size:0.85rem;color:var(--text2);}
+    .item-save{font-size:0.75rem;color:var(--accent);letter-spacing:0.06em;}
+    .item-remove{
+        width:32px;height:32px;
+        border:1px solid var(--border);
+        display:flex;align-items:center;justify-content:center;
+        text-decoration:none;color:var(--text);
+        flex-shrink:0;transition:background 0.2s,color 0.2s;
+    }
+    .item-remove:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+    /* Summary */
+    .bill-row{
+        display:flex;justify-content:space-between;
+        font-size:0.83rem;margin-bottom:1rem;color:var(--text);
+    }
+    .bill-row.muted .val{color:var(--text2);}
+    .bill-row.discount .val{color:var(--accent);}
+    .bill-row.free .val{color:#22c55e;}
+    .bill-divider{height:1px;background:var(--border);margin:1.2rem 0;}
+    .bill-total{
+        display:flex;justify-content:space-between;
+        font-family:'Bebas Neue',sans-serif;
+        font-size:1.6rem;margin-bottom:1.5rem;
+    }
+    .bill-total .val{color:var(--accent);}
+    .checkout-btn{
+        display:block;text-align:center;
+        padding:14px;background:var(--btn);color:var(--btn-text);
+        border:1px solid var(--border);
+        font-size:0.75rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
+        text-decoration:none;margin-bottom:0.8rem;
+        transition:background 0.3s,color 0.3s,transform 0.2s;
+    }
+    .checkout-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-2px);}
+    .continue-btn{
+        display:block;text-align:center;
+        padding:14px;background:transparent;color:var(--text);
+        border:1px solid var(--border);
+        font-size:0.75rem;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;
+        text-decoration:none;transition:background 0.2s;
+    }
+    .continue-btn:hover{background:var(--bg2);}
+    .empty-cart{
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        min-height:60vh;gap:1.5rem;
+    }
+    .empty-cart i{font-size:4rem;color:var(--border);opacity:0.3;}
+    .empty-cart p{font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);}
+    .savings-badge{
+        background:var(--accent);color:#fff;
+        padding:8px 16px;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;
+        margin-bottom:1.5rem;display:inline-block;
+    }
+</style>
+
+<div class="cart-wrap page-content">
+
+    <% if(user.cart.length === 0){ %>
+        <div class="empty-cart" style="flex:1;padding:2.5rem;">
+            <i class="ri-shopping-bag-line"></i>
+            <p>Your bag is empty</p>
+            <a href="/shop" class="checkout-btn" style="width:200px;">Go Shopping</a>
+        </div>
+    <% } else { %>
+
+    <!-- Items -->
+    <div class="cart-items-col">
+        <div class="col-title">Your Bag (<%= user.cart.length %>)</div>
+        <% user.cart.forEach(function(product){ %>
+        <div class="cart-item">
+            <div class="item-img" style="background-color:<%= product.bgcolor || 'var(--bg2)' %>">
+                <img src="data:image/jpeg;base64,<%= product.image %>" alt="<%= product.name %>">
+            </div>
+            <div class="item-info">
+                <div class="item-name"><%= product.name %></div>
+                <div class="item-price">₹<%= product.price - product.discount %>
+                    <% if(product.discount>0){ %>
+                        <span style="text-decoration:line-through;opacity:0.5;margin-left:6px;">₹<%= product.price %></span>
+                    <% } %>
+                </div>
+                <% if(product.discount>0){ %>
+                    <div class="item-save">You save ₹<%= product.discount %></div>
+                <% } %>
+            </div>
+            <a href="/users/removefromcart/<%= product._id %>" class="item-remove">
+                <i class="ri-delete-bin-line"></i>
+            </a>
+        </div>
+        <% }) %>
+    </div>
+
+    <!-- Summary -->
+    <div class="cart-summary-col">
+        <div class="col-title">Bill</div>
+
+        <% 
+          const totalMRP = user.cart.reduce((t,p)=>t+p.price,0);
+          const totalDiscount = user.cart.reduce((t,p)=>t+p.discount,0);
+          const platformFee = 20;
+          const finalBill = bill;
+        %>
+
+        <% if(totalDiscount>0){ %>
+            <div class="savings-badge">You're saving ₹<%= totalDiscount %> 🎉</div>
+        <% } %>
+
+        <div class="bill-row muted">
+            <span>Total MRP (<%= user.cart.length %> items)</span>
+            <span class="val">₹<%= totalMRP %></span>
+        </div>
+        <div class="bill-row discount">
+            <span>Discount on MRP</span>
+            <span class="val">− ₹<%= totalDiscount %></span>
+        </div>
+        <div class="bill-row">
+            <span>Platform Fee</span>
+            <span class="val">₹<%= platformFee %></span>
+        </div>
+        <div class="bill-row free">
+            <span>Shipping</span>
+            <span class="val">FREE</span>
+        </div>
+
+        <div class="bill-divider"></div>
+
+        <div class="bill-total">
+            <span>Total</span>
+            <span class="val">₹<%= finalBill %></span>
+        </div>
+
+        <a href="#" class="checkout-btn">
+            Checkout <i class="ri-arrow-right-line"></i>
+        </a>
+        <a href="/shop" class="continue-btn">Continue Shopping</a>
+    </div>
+
+    <% } %>
+</div>
+
+<%- include('./partials/footer') %>

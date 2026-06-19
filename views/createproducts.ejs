@@ -98,6 +98,50 @@
                 Create Product <i class="ri-add-line"></i>
             </button>
         </form>
+
+        <!-- Products List -->
+        <% if(products && products.length > 0) { %>
+            <div style="margin-top:4rem;border-top:1px solid var(--border);padding-top:2rem;">
+                <div class="admin-title" style="font-size:1.8rem;margin-bottom:1.5rem;">Existing Products</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;">
+                    <% products.forEach(product => { %>
+                        <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;">
+                            <!-- Product Image -->
+                            <% if(product.image) { %>
+                                <div style="width:100%;height:200px;background:<%=product.bgcolor || '#f0f0f0'%>;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                                    <img src="data:image/jpeg;base64,<%=product.image%>" style="width:100%;height:100%;object-fit:contain;padding:1rem;">
+                                </div>
+                            <% } else { %>
+                                <div style="width:100%;height:200px;background:#ddd;display:flex;align-items:center;justify-content:center;color:#999;">No Image</div>
+                            <% } %>
+                            
+                            <!-- Product Info -->
+                            <div style="padding:1rem;background:var(--card);color:var(--text);">
+                                <h3 style="font-weight:600;margin-bottom:0.4rem;"><%= product.name %></h3>
+                                <div style="display:flex;gap:1rem;font-size:0.9rem;margin-bottom:1rem;">
+                                    <span style="color:var(--accent);font-weight:600;">₹ <%= product.price %></span>
+                                    <% if(product.discount > 0) { %>
+                                        <span style="color:var(--text2);text-decoration:line-through;"><%- product.discount %></span>
+                                    <% } %>
+                                </div>
+                                
+                                <!-- Delete Button -->
+                                <a href="/owners/deleteproduct/<%= product._id %>" 
+                                   style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+                                   background:var(--accent);color:#fff;border:1px solid var(--accent);
+                                   font-size:0.75rem;font-weight:500;letter-spacing:0.1em;
+                                   text-transform:uppercase;text-decoration:none;border-radius:2px;
+                                   transition:background 0.2s,transform 0.2s;cursor:pointer;"
+                                   onmouseover="this.style.transform='scale(1.05)'" 
+                                   onmouseout="this.style.transform='scale(1)'">
+                                    <i class="ri-delete-bin-line"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } %>
     </main>
 </div>
 

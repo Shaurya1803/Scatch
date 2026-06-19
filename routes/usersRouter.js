@@ -34,7 +34,7 @@ router.get("/cart", isLoggedIn, async function(req, res) {
             return total + product.price - product.discount;
         }, 0) + 20; // platform fee
 
-        res.render("cart", { user, bill });
+        res.render("cart", { user, bill, isAdmin: req.session?.isAdmin || false });
     } catch(err) {
         req.flash("error", err.message);
         res.redirect("/shop");

@@ -5,14 +5,14 @@ const productModel = require("../models/product-model");
 
 router.get("/", (req, res) => {
     let error = req.flash("error");
-    res.render("index", { error });
+    res.render("index", { error, isAdmin: req.session?.isAdmin || false });
 });
 
 router.get("/shop", isLoggedIn, async function(req, res) {
     try {
         let products = await productModel.find();
         let success = req.flash("success");
-        res.render("shop", { products, success, user: req.user });
+        res.render("shop", { products, success, user: req.user, isAdmin: req.session?.isAdmin || false });
     } catch(err) {
         req.flash("error", err.message);
         res.redirect("/");

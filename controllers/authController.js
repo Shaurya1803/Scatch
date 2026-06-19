@@ -23,7 +23,8 @@ module.exports.registerUser = async function (req, res) {
                     });
                     let token = generateToken(user);
                     res.cookie("token", token);
-                    res.send("user created successfully");
+                    req.flash("success", "Account created successfully! You are now logged in.");
+                    res.redirect("/shop");
                 }
             });
         });

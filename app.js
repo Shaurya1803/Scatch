@@ -35,7 +35,7 @@ app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 
 app.get("/", (req, res) => {
-    res.render("index", { error: "" });
+    res.render("index", { error: "", isAdmin: req.session?.isAdmin || false });
 });
 
 app.listen(3000);

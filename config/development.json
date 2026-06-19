@@ -1,3 +1,3 @@
 {
-    "MONGODB_URI": "mongodb+srv://shauryatiwari157_db_user:shaurya18032006@cluster0.u8hjpty.mongodb.net/?retryWrites=true&w=majority"
+    "MONGODB_URI": "mongodb+srv://shauryatiwari157_db_user:shaurya18032006@cluster0.u8hjpty.mongodb.net/scatch?retryWrites=true&w=majority"
 }
